@@ -12,21 +12,25 @@
 #define TIMEOUT     10000L
 
 int main(int argc, char* argv[]) {
-    printf("Type '1' to send payload 'ON'\nType '2' to send payload 'OFF'\nType '3' to quit\n");
-
+    printf("Attempting to initialize client...\n");
     MQTTClient client;
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     int rc; // response code
     if ((rc = MQTTClient_create(&client, ADDRESS, CLIENTID, MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTCLIENT_SUCCESS) {
-        printf("Failed to create client, rc=%d\n", rc);
+        printf("Client initialization unsuccessful, rc=%d\n", rc);
         exit(EXIT_FAILURE);
     }
-    conn_opts.keepAliveInterval = 100; // keep alive to 5 seconds
+    conn_opts.keepAliveInterval = 20; // keep alive to 20 seconds
     conn_opts.cleansession = 1; // make it clean
+    conn_opts.connectTimeout = 5; // timeout in 5 seconds
+    printf("Client initialization successful\n");
+    printf("Attempting to connect to broker...\n");
     if ((rc = MQTTClient_connect(client, &conn_opts)) != MQTTCLIENT_SUCCESS) {
-        printf("Failed to connect, rc=%d\n", rc);
+        printf("Connection unsuccessful, timeout=5s, rc=%d\n", rc);
         exit(EXIT_FAILURE);
     }
+    printf("Connection successful\n");
+    printf("Type '1' to send payload 'ON'\nType '2' to send payload 'OFF'\nType '3' to quit\n");
 
     MQTTClient_message msg = MQTTClient_message_initializer;
     MQTTClient_deliveryToken token;
