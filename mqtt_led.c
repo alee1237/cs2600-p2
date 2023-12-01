@@ -1,13 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <conio.h>
 #include "MQTTClient.h"
 
 #define ADDRESS     "35.212.161.165"
 #define CLIENTID    "Laptop"
 #define TOPIC       "home/project-2"
-#define PAYLOAD     "Hello World!"
 #define QOS         1
 #define TIMEOUT     10000L
 
@@ -36,27 +34,25 @@ int main(int argc, char* argv[]) {
     MQTTClient_deliveryToken token;
     char ch = '0';
     while (ch != '3') {
-        if (kbhit()) {
-            ch = getch(); // char entered
-            char* payload_msg;
-            if (ch == '1') {
-                payload_msg = "ON";
-            } else if (ch == '2') {
-                payload_msg = "OFF";
-            } else {
-                continue;
-            }
-            msg.payload = payload_msg;
-            msg.payloadlen = (int) strlen(payload_msg);
-            msg.qos = QOS;
-            msg.retained = 0;
-            if ((rc = MQTTClient_publishMessage(client, TOPIC, &msg, &token)) != MQTTCLIENT_SUCCESS) {
-                printf("Failed to publish message, rc=%d\n", rc);
-                exit(EXIT_FAILURE);
-            }
-            rc = MQTTClient_waitForCompletion(client, token, TIMEOUT);
-            printf("Sending payload '%s'\n", payload_msg);
+        ch = getchar(); // char entered
+        char* payload_msg;
+        if (ch == '1') {
+            payload_msg = "ON";
+        } else if (ch == '2') {
+            payload_msg = "OFF";
+        } else {
+            continue;
         }
+        msg.payload = payload_msg;
+        msg.payloadlen = (int) strlen(payload_msg);
+        msg.qos = QOS;
+        msg.retained = 0;
+        if ((rc = MQTTClient_publishMessage(client, TOPIC, &msg, &token)) != MQTTCLIENT_SUCCESS) {
+            printf("Failed to publish message, rc=%d\n", rc);
+            exit(EXIT_FAILURE);
+        }
+        MQTTClient_waitForCompletion(client, token, TIMEOUT);
+        printf("Sending payload '%s'\n", payload_msg);
     }
     if ((rc = MQTTClient_disconnect(client, 10000)) != MQTTCLIENT_SUCCESS) printf("Failed to disconnect, rc=%d\n", rc);
     MQTTClient_destroy(&client);
